@@ -3,22 +3,14 @@ package com.example;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.net.URL;
 
 // установка файла через конструктор
 // получение имен страниц
@@ -28,7 +20,7 @@ import java.net.URL;
 public class ReadExcel {
     private String FileName;        // имя файла excel
     private InputStream ReadFile;   // поток чтения файла
-    private Workbook workbook;      // книга
+    private XSSFWorkbook workbook;      // книга
     private int sheetIndex;         // номер выбранной страницы
     private int even, odd;          // номера строк для четной, нечетной недель
     private int group;              // номер выбранной группы
@@ -46,18 +38,22 @@ public class ReadExcel {
     ReadExcel(String fileName) {
         FileName = fileName;
         try {
-            //URL url = this.getClass().getResource(fileName);
-            ReadFile = getClass().getResourceAsStream(fileName);//url.openStream();
-            //ReadFile = new FileInputStream(FileName);
+            ReadFile = getClass().getResourceAsStream(fileName);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // if (ReadFile != null){
+        //     System.out.println("Y");
+        // }
+        // else{
+        //     System.out.println("ERR");
+        // }
 
         workbook = null;
         try {
-            workbook = WorkbookFactory.create(ReadFile);
+            workbook = new XSSFWorkbook(ReadFile);
         } catch (Exception e) {
-            System.out.println("Read error");
+            e.printStackTrace();
         }
 
         setSheetNames();
@@ -77,7 +73,7 @@ public class ReadExcel {
 
         workbook = null;
         try {
-            workbook = WorkbookFactory.create(ReadFile);
+            workbook = new XSSFWorkbook(ReadFile);
         } catch (Exception e) {
             System.out.println("Read error");
         }
@@ -196,7 +192,7 @@ public class ReadExcel {
 
     // расписание на неделю
     public ArrayList<ArrayList<String>> WeakShedule(int weak) {
-        int srcWeak = weak;
+        //int srcWeak = weak;
         if (weak == 0) {
             weak = even;
         } else {
@@ -240,7 +236,7 @@ public class ReadExcel {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         Row row = sheet.getRow(startY);
         Cell cell = row.getCell(startX);
-        boolean f = false, wide = false;
+        boolean f = false; //wide = false;
         boolean LR = false;
         String item = "";
         char num = '1';
@@ -484,21 +480,21 @@ public class ReadExcel {
     }
 
     // ТЕСТ конец расписания
-    private int ReturnEnd() {
-        Sheet sheet = workbook.getSheetAt(sheetIndex);
-        Row row = sheet.getRow(even);
-        Cell cell = row.getCell(0);
-        int time = Time();
-        int miss = 0, last = even - 2, count = even + 1;
-        cell = row.getCell(time);
-        while (!cell.getStringCellValue().equals("Начальник учебного отдела                                                                     О.Н. Денисова")) {
-            last++;
-            count++;
-            row = sheet.getRow(count);
-            cell = row.getCell(time);
-        }
-        return last;
-    }
+    // private int ReturnEnd() {
+    //     Sheet sheet = workbook.getSheetAt(sheetIndex);
+    //     Row row = sheet.getRow(even);
+    //     Cell cell = row.getCell(0);
+    //     int time = Time();
+    //     int miss = 0, last = even - 2, count = even + 1;
+    //     cell = row.getCell(time);
+    //     while (!cell.getStringCellValue().equals("Начальник учебного отдела                                                                     О.Н. Денисова")) {
+    //         last++;
+    //         count++;
+    //         row = sheet.getRow(count);
+    //         cell = row.getCell(time);
+    //     }
+    //     return last;
+    // }
 
     // возврат номера столбца 'Время подачи звонков'
     private int Time() {

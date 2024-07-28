@@ -18,7 +18,6 @@ import java.util.ArrayList;
 // получение названий групп
 // установка группы
 public class ReadExcel {
-    private String FileName;        // имя файла excel
     private InputStream ReadFile;   // поток чтения файла
     private XSSFWorkbook workbook;      // книга
     private int sheetIndex;         // номер выбранной страницы
@@ -34,48 +33,21 @@ public class ReadExcel {
     ReadExcel() {
     }
 
-    // Не главный конструктор
     ReadExcel(String fileName) {
-        FileName = fileName;
         try {
-            ReadFile = getClass().getResourceAsStream(fileName);
+            // ReadFile = getClass().getResourceAsStream(fileName);
+            ReadFile = new FileInputStream(fileName);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // if (ReadFile != null){
-        //     System.out.println("Y");
-        // }
-        // else{
-        //     System.out.println("ERR");
-        // }
+
+        ReadFile = openFileRead(fileName);
 
         workbook = null;
         try {
             workbook = new XSSFWorkbook(ReadFile);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        setSheetNames();
-    }
-
-    // тестовый конструктор
-    ReadExcel(String fileName, int sheetindex) {
-        FileName = fileName;
-        ReadFile = openFileRead();
-        setSheetIndex(sheetindex);
-        Main();
-    }
-
-    // главный конструктор
-    ReadExcel(InputStream fis) {
-        ReadFile = fis;
-
-        workbook = null;
-        try {
-            workbook = new XSSFWorkbook(ReadFile);
-        } catch (Exception e) {
-            System.out.println("Read error");
         }
 
         setSheetNames();
@@ -125,10 +97,10 @@ public class ReadExcel {
     }
 
     // открытие потока чтения файла
-    private InputStream openFileRead() {
+    private InputStream openFileRead(String fileName) {
         InputStream read = null;
         try {
-            read = new FileInputStream(FileName);
+            read = new FileInputStream(fileName);
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -167,6 +139,10 @@ public class ReadExcel {
 
     // получение имен групп и их количества
     private void setGroupNames(Sheet sheet) {
+        groupNames.clear();
+        groupIndex.clear();
+        groupAmount = 0;
+        
         Row row = sheet.getRow(odd);
         int count = Time() + 1;
         Cell cell = row.getCell(count);
@@ -207,28 +183,12 @@ public class ReadExcel {
             endX = groupIndex.get(group + 1);
         }
         for (int i = 0; i < days.size() - 1; i += 1) {
-            // ArrayList<String> test = new ArrayList<String>(0);
-            // test.add(0, "te");
             ArrayList<String> tmp = dayItems(groupIndex.get(group), endX, days.get(i), days.get(i + 1));
-            //fillWideItems(tmp, srcWeak, i);
             weakShedule.add(tmp);
         }
 
         return weakShedule;
     }
-
-//    private ArrayList<String> fillWideItems(ArrayList<String> dayItems, int weak, int day){
-//        Sheet sheet = workbook.getSheetAt(sheetIndex);
-//
-//        for (int i = 0; i < wideItemsInfo.size(); i++){
-//            if (wideItemsInfo.get(i).get(0) == group && wideItemsInfo.get(i).get(1) == weak && wideItemsInfo.get(i).get(2) == day){
-//                Row row = sheet.getRow(wideItemsInfo.get(i).get(4));
-//                Cell cell = row.getCell(groupIndex.get(group - 1));
-//                dayItems.add(wideItemsInfo.get(i).get(3), wideItems.get(i));
-//            }
-//        }
-//        return dayItems;
-//    }
 
     // расписание на день
     private ArrayList<String> dayItems(int startX, int endX, int startY, int endY) {
@@ -360,20 +320,6 @@ public class ReadExcel {
         return finalItems;
     }
 
-//    private void mergedCellList(){
-//        Sheet sheet = workbook.getSheetAt(sheetIndex);
-//        int sheetMergeCount = sheet.getNumMergedRegions();
-//        for (int i = 0; i < sheetMergeCount; i++) {
-//            CellRangeAddress region = sheet.getMergedRegion(i);
-//            mergedRegions.put(Pair.create(region.getFirstRow(), region.getFirstColumn()), 1);
-//        }
-//    }
-
-//    Map<Pair<Integer, Integer>, Integer> mergedRegions = new HashMap<Pair<Integer, Integer>, Integer>();
-
-//    private ArrayList<ArrayList<Integer>> wideItemsInfo = new ArrayList<ArrayList<Integer>>(); // // запись о широкой паре
-//    private ArrayList<String> wideItems = new ArrayList<String>(); // широкая пара
-
     private boolean isWideMerged(int row, int column) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         int sheetMergeCount = sheet.getNumMergedRegions();
@@ -395,30 +341,12 @@ public class ReadExcel {
     // двойная пара?
     private boolean isMergedRegion(int row, int column) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
-//        Row row1 = sheet.getRow(row);
-//        Cell cell = row1.getCell(column);
 //        String t = cell.getStringCellValue();
         int sheetMergeCount = sheet.getNumMergedRegions();
         CellRangeAddress ca;
-//        Integer b = mergedRegions.get(Pair.create(column, row));
-//        if (b != null){
-//            return true;
-//        }
-//        else {
-//            return false;
-//        }
         for (int i = 0; i < sheetMergeCount; i++) {
             ca = sheet.getMergedRegion(i);
             if (row >= ca.getFirstRow() && row <= ca.getLastRow() && column >= ca.getFirstColumn() && column <= ca.getLastColumn()) {
-//                if (ca.getLastColumn() >= groupIndex.get(group + 1)){
-//                    ArrayList<Integer> tmp = new ArrayList<>();
-//                    tmp.add(group + 1);
-//                    tmp.add(weak);
-//                    tmp.add(day);
-//                    tmp.add(numItem);
-//                    wideItems.add(item);
-//                    wideItemsInfo.add(tmp);
-//                }
                 if (ca.getLastRow() > ca.getFirstRow() + 1) {
                     return true;
                 }
@@ -479,23 +407,6 @@ public class ReadExcel {
         return last;
     }
 
-    // ТЕСТ конец расписания
-    // private int ReturnEnd() {
-    //     Sheet sheet = workbook.getSheetAt(sheetIndex);
-    //     Row row = sheet.getRow(even);
-    //     Cell cell = row.getCell(0);
-    //     int time = Time();
-    //     int miss = 0, last = even - 2, count = even + 1;
-    //     cell = row.getCell(time);
-    //     while (!cell.getStringCellValue().equals("Начальник учебного отдела                                                                     О.Н. Денисова")) {
-    //         last++;
-    //         count++;
-    //         row = sheet.getRow(count);
-    //         cell = row.getCell(time);
-    //     }
-    //     return last;
-    // }
-
     // возврат номера столбца 'Время подачи звонков'
     private int Time() {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
@@ -509,16 +420,6 @@ public class ReadExcel {
         return time;
     }
 
-    // главная функция
-    // открытие книги для чтение
-    private void Main() {
-        Sheet sheet = workbook.getSheetAt(sheetIndex);
-        setRows(sheet);
-        setGroupNames(sheet);
-        // функции сюда
-        //...
-    }
-
     // закрытие
     public void close() {
         // закрытие всего
@@ -530,16 +431,3 @@ public class ReadExcel {
         }
     }
 }
-
-//    private void mergedCell(){
-//        Sheet sheet = workbook.getSheetAt(sheetIndex);
-//        int sheetMergeCount = sheet.getNumMergedRegions();
-//        for (int i = 0; i < sheetMergeCount; i++){
-//            CellRangeAddress range = sheet.getMergedRegion(i);
-//            Row row = sheet.getRow(range.getFirstRow());
-//            Cell cell = row.getCell(range.getFirstColumn());
-//            String z = range.formatAsString();
-//        }
-//        return;
-//    }
-//}

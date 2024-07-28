@@ -214,15 +214,8 @@ public class ReadExcel {
                     item = "";
                     int intNum = num - '1';
                     used[intNum] += 1;
-                    if (compForQuad(cell.getStringCellValue()) == true){
-                        LR = true;
-                        used[intNum] -= 1;
-                        forNext[intNum] += 1;
-                    }
-                    else {
                         item += num;
                         item += " ";
-                    }
                     item += cell.getStringCellValue();
                     row = sheet.getRow(y);
                     cell = row.getCell(x);
@@ -242,25 +235,6 @@ public class ReadExcel {
                         forNext[intNum + 1] += 1;
                     }
                 }
-                if (cell.getStringCellValue().equals("") && groupIndex.get(group) != groupIndex.get(0)){
-                    if (isWideMerged(y, (x - (groupIndex.get(group) - groupIndex.get(group - 1)))) == true) {
-                        item = "";
-                        item += num;
-                        item += " ";
-                        int intNum = num - '1';
-                        cell = row.getCell(groupIndex.get(group - 1));
-                        item += cell.getStringCellValue();
-                        row = sheet.getRow(y);
-                        cell = row.getCell(groupIndex.get(group - 1));
-                        item += " ";
-                        item += cell.getStringCellValue();
-                        used[intNum] += 1;
-                        items.add(item);
-//                        if (isMergedRegion(y, x)) {
-//                            forNext[intNum + 1] += 1;
-//                        }
-                    }
-                }
                 row = sheet.getRow(y - 1);
             }
             row = sheet.getRow(y);
@@ -271,29 +245,7 @@ public class ReadExcel {
                 f = true;
             }
         }
-//        return items;
         return finalizeDayItems(items, used, forNext);
-    }
-
-    private boolean compForQuad(String src){
-        boolean f = false;
-        ArrayList<String> ref = new ArrayList<>();
-        ref.add("лабораторные работы");
-        ref.add("ассистент Александрова А.А.");
-        ref.add("старший преподаватель Елистратов С.С.");
-        ref.add("практика");
-        ref.add(" недели: 24,28,32,36  1 подгруппа Спортивный зал");
-        ref.add("Панов А.Ю.");
-        ref.add("профессор Логунов В.И.");
-        ref.add("");
-        ref.add("");
-        ref.add("");
-        for (int i = 0; i < ref.size(); i++){
-            if (src.equals(ref.get(i))){
-                f = true;
-            }
-        }
-        return f;
     }
 
     private ArrayList<String> finalizeDayItems(ArrayList<String> items, int[] used, int[] forNext) {
@@ -320,28 +272,27 @@ public class ReadExcel {
         return finalItems;
     }
 
-    private boolean isWideMerged(int row, int column) {
-        Sheet sheet = workbook.getSheetAt(sheetIndex);
-        int sheetMergeCount = sheet.getNumMergedRegions();
-        CellRangeAddress ca;
-        for (int i = 0; i < sheetMergeCount; i++) {
-            ca = sheet.getMergedRegion(i);
-            if (row == ca.getFirstRow() && column == ca.getFirstColumn()) {
-                if (ca.getLastColumn() >= groupIndex.get(group)){
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-        }
-        return false;
-    }
+    // private boolean isWideMerged(int row, int column) {
+    //     Sheet sheet = workbook.getSheetAt(sheetIndex);
+    //     int sheetMergeCount = sheet.getNumMergedRegions();
+    //     CellRangeAddress ca;
+    //     for (int i = 0; i < sheetMergeCount; i++) {
+    //         ca = sheet.getMergedRegion(i);
+    //         if (row == ca.getFirstRow() && column == ca.getFirstColumn()) {
+    //             if (ca.getLastColumn() >= groupIndex.get(group)){
+    //                 return true;
+    //             }
+    //             else {
+    //                 return false;
+    //             }
+    //         }
+    //     }
+    //     return false;
+    // }
 
     // двойная пара?
     private boolean isMergedRegion(int row, int column) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
-//        String t = cell.getStringCellValue();
         int sheetMergeCount = sheet.getNumMergedRegions();
         CellRangeAddress ca;
         for (int i = 0; i < sheetMergeCount; i++) {

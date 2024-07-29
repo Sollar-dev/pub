@@ -5,7 +5,7 @@ public class Main {
 
         String FILE_NAME = "xlsx/etf_vesna24.xlsx";
 
-        new fillWithThis(FILE_NAME);
+        new fillDBWithThis(FILE_NAME);
         
 
         // File forDel = new File("db/test.db.txt");

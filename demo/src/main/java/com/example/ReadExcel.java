@@ -223,7 +223,7 @@ public class ReadExcel {
 
                     items.add(item);
 
-                    if (isMergedRegion(y, x)) {
+                    if (downDoubleMerge(y, x)) {
                         forNext[indexNum + 1] += 1;
                     }
                 }
@@ -251,7 +251,7 @@ public class ReadExcel {
                                     item += " ";
                                     cellForWide = row.getCell(groupIndex.get(prevGroup) + (x - groupIndex.get(group)));
                                     item += cellForWide.getStringCellValue();
-    
+            
                                     items.add(item);
                                     break;
                             }
@@ -273,6 +273,11 @@ public class ReadExcel {
         return finalizeDayItems(items, used, forNext);
     }
 
+    // private boolean forQuad(){
+
+    // }
+
+    // входит ли группа в широкий предмет
     private boolean isWideMerged(int row, int column) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         int sheetMergeCount = sheet.getNumMergedRegions();
@@ -291,13 +296,14 @@ public class ReadExcel {
         return false;
     }
 
+    // финальная редакция расписания на день
     private ArrayList<String> finalizeDayItems(ArrayList<String> items, int[] used, int[] forNext) {
         ArrayList<String> finalItems = new ArrayList<String>();
         int count = 0;
         for (int i = 0; i < 6; i++) {
             if (used[i] != 0) {
                 while (used[i] != 0) {
-                    finalItems.add(items.get(count));
+                    finalItems.add(trimSpaces(items.get(count)));
                     count++;
                     used[i] -= 1;
                 }
@@ -315,8 +321,25 @@ public class ReadExcel {
         return finalItems;
     }
 
+    // удалает лишние пробелы
+    private String trimSpaces(String item){
+        String str = "";
+        while(true){
+            item = item.replaceFirst(" ", "*");
+            if (!item.contains("*")){
+                str += item;
+                break;
+            }
+            str += item.substring(0, item.indexOf("*", 0)) + " ";
+            item = item.substring(item.indexOf("*", 0) + 1, item.length());
+            item = item.stripLeading();
+        }
+
+        return str;
+    }
+
     // двойная пара? вниз
-    private boolean isMergedRegion(int row, int column) {
+    private boolean downDoubleMerge(int row, int column) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         int sheetMergeCount = sheet.getNumMergedRegions();
         CellRangeAddress ca;

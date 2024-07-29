@@ -3,11 +3,11 @@ package com.example;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class fillWithThis {
+public class fillDBWithThis {
     ReadExcel RE;
     dbHandler mDbHandler;
 
-    fillWithThis(String fileName){
+    fillDBWithThis(String fileName){
         RE = new ReadExcel(fileName);
 
         parseAll();

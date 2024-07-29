@@ -19,16 +19,16 @@ import java.util.ArrayList;
 // установка группы
 public class ReadExcel {
     private InputStream ReadFile;   // поток чтения файла
-    private XSSFWorkbook workbook;      // книга
+    private XSSFWorkbook workbook;  // книга
     private int sheetIndex;         // номер выбранной страницы
     private int even, odd;          // номера строк для четной, нечетной недель
     private int group;              // номер выбранной группы
 
-    private ArrayList<String> sheetsNames = new ArrayList<String>(); // имена листов
-    private ArrayList<String> groupNames = new ArrayList<String>();  // названия групп
+    private ArrayList<String> sheetsNames = new ArrayList<String>();  // имена листов
+    private ArrayList<String> groupNames = new ArrayList<String>();   // названия групп
     private ArrayList<Integer> groupIndex = new ArrayList<Integer>(); // номера столбцов групп
-    private int sheetsAmount;        // количество листов
-    private int groupAmount;         // количество групп
+    private int sheetsAmount;       // количество листов
+    private int groupAmount;        // количество групп
 
     ReadExcel() {
     }
@@ -79,13 +79,11 @@ public class ReadExcel {
     }
 
     // установка выбранной страницы
-    // взов главного метода
     public void setSheetIndex(int sheetindex) {
         sheetIndex = sheetindex;
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         setRows(sheet);
         setGroupNames(sheet);
-//        mergedCellList();
     }
 
     // получение имен листов, их количества
@@ -196,12 +194,12 @@ public class ReadExcel {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         Row row = sheet.getRow(startY);
         Cell cell = row.getCell(startX);
-        boolean f = false; //wide = false;
-        boolean LR = false;
+        boolean f = false;
         String item = "";
         char num = '1';
         int[] forNext = new int[] {0, 0, 0, 0, 0, 0};
-        int[] used = new int[]{0, 0, 0, 0, 0, 0};
+        int[] used = new int[] {0, 0, 0, 0, 0, 0};
+
         for (int y = startY + 1; y < endY; y += 1) {
             for (int x = startX; x < endX; x += 1) {
                 if (row.getCell(x) != null){
@@ -210,29 +208,56 @@ public class ReadExcel {
                 else {
                     cell.setCellValue("");
                 }
+
                 if (!cell.getStringCellValue().equals("") && !f) {
                     item = "";
-                    int intNum = num - '1';
-                    used[intNum] += 1;
-                        item += num;
-                        item += " ";
+                    int indexNum = num - '1';
+                    used[indexNum] += 1;
+                    item += num;
+                    item += " ";
                     item += cell.getStringCellValue();
                     row = sheet.getRow(y);
                     cell = row.getCell(x);
                     item += " ";
                     item += cell.getStringCellValue();
-                    if (LR == true){
-                        String prev = items.get(items.size() - 1);
-                        items.remove(items.size() - 1);
-                        prev += " " + item;
-                        items.add(prev);
-                        LR = false;
-                    }
-                    else {
-                        items.add(item);
-                    }
+
+                    items.add(item);
+
                     if (isMergedRegion(y, x)) {
-                        forNext[intNum + 1] += 1;
+                        forNext[indexNum + 1] += 1;
+                    }
+                }
+
+                if (cell.getStringCellValue().equals("") && !f && (groupIndex.get(group) == x)){
+                    Cell cellForWide;
+                    int prevGroup = group - 1;
+                    while(prevGroup >= 0){
+                        cellForWide = row.getCell(groupIndex.get(prevGroup) + (x - groupIndex.get(group)));
+                        if (row.getCell(groupIndex.get(prevGroup) + (x - groupIndex.get(group))) != null){
+                            cellForWide = row.getCell(groupIndex.get(prevGroup) + (x - groupIndex.get(group)));
+                        }
+                        else {
+                            cellForWide.setCellValue("");
+                        }
+                        if (!cellForWide.getStringCellValue().equals("")){
+                            if (isWideMerged(row.getRowNum(), cellForWide.getColumnIndex()) == true){
+                                    item = "";
+                                    int indexNum = num - '1';
+                                    used[indexNum] += 1;
+                                    item += num;
+                                    item += " ";
+                                    item += cellForWide.getStringCellValue();
+                                    row = sheet.getRow(y);
+                                    item += " ";
+                                    cellForWide = row.getCell(groupIndex.get(prevGroup) + (x - groupIndex.get(group)));
+                                    item += cellForWide.getStringCellValue();
+    
+                                    items.add(item);
+                                    break;
+                            }
+                        }
+                        
+                        prevGroup -= 1;
                     }
                 }
                 row = sheet.getRow(y - 1);
@@ -246,6 +271,24 @@ public class ReadExcel {
             }
         }
         return finalizeDayItems(items, used, forNext);
+    }
+
+    private boolean isWideMerged(int row, int column) {
+        Sheet sheet = workbook.getSheetAt(sheetIndex);
+        int sheetMergeCount = sheet.getNumMergedRegions();
+        CellRangeAddress ca;
+        for (int i = 0; i < sheetMergeCount; i++) {
+            ca = sheet.getMergedRegion(i);
+            if (row == ca.getFirstRow() && column == ca.getFirstColumn()) {
+                if (ca.getLastColumn() >= groupIndex.get(group)){
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     private ArrayList<String> finalizeDayItems(ArrayList<String> items, int[] used, int[] forNext) {
@@ -272,25 +315,7 @@ public class ReadExcel {
         return finalItems;
     }
 
-    // private boolean isWideMerged(int row, int column) {
-    //     Sheet sheet = workbook.getSheetAt(sheetIndex);
-    //     int sheetMergeCount = sheet.getNumMergedRegions();
-    //     CellRangeAddress ca;
-    //     for (int i = 0; i < sheetMergeCount; i++) {
-    //         ca = sheet.getMergedRegion(i);
-    //         if (row == ca.getFirstRow() && column == ca.getFirstColumn()) {
-    //             if (ca.getLastColumn() >= groupIndex.get(group)){
-    //                 return true;
-    //             }
-    //             else {
-    //                 return false;
-    //             }
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // двойная пара?
+    // двойная пара? вниз
     private boolean isMergedRegion(int row, int column) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         int sheetMergeCount = sheet.getNumMergedRegions();
@@ -314,7 +339,6 @@ public class ReadExcel {
         if (weak == odd) {
             last = even;
         } else {
-            //last = ReturnEnd();
             last = endSheduleVertical();
         }
         weak += 1;

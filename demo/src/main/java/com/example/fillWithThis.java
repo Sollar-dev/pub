@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class fillWithThis {
-    // InputStream inputStream = null;
     ReadExcel RE;
     dbHandler mDbHandler;
 
@@ -14,7 +13,6 @@ public class fillWithThis {
         parseAll();
 
         RE.close();
-        //mDbHandler.closeConnection();
     }
 
     private void parseAll(){
@@ -31,7 +29,7 @@ public class fillWithThis {
 
                 RE.setGroup(grNum);
 
-                insertWeek(cs, gr);
+                insertWeeks(cs, gr);
 
                 grNum += 1;
             }
@@ -40,7 +38,7 @@ public class fillWithThis {
         }
     }
 
-    private void insertWeek(String course, String group){
+    private void insertWeeks(String course, String group){
         // 0 четная, 1 нечетная
         ArrayList<ArrayList<String>> weekItems = RE.DoubleWeak();
 

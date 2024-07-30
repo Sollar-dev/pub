@@ -212,20 +212,31 @@ public class ReadExcel {
                 if (!cell.getStringCellValue().equals("") && !f) {
                     item = "";
                     int indexNum = num - '1';
-                    used[indexNum] += 1;
-                    item += num;
+                    if (forQuad(cell.getStringCellValue())){
+                        item = items.get(items.size() - 1);
+                        items.remove(items.size() - 1);
+                        forNext[indexNum] += 1;
+                    }
+                    else{
+                        used[indexNum] += 1;
+                        item += num;
+                        if (downDoubleMerge(y, x)) {
+                            forNext[indexNum + 1] += 1;
+                        }
+                    }
+
                     item += " ";
                     item += cell.getStringCellValue();
+
                     row = sheet.getRow(y);
                     cell = row.getCell(x);
                     item += " ";
                     item += cell.getStringCellValue();
 
                     items.add(item);
-
-                    if (downDoubleMerge(y, x)) {
-                        forNext[indexNum + 1] += 1;
-                    }
+                    // if (downDoubleMerge(y, x)) {
+                    //     forNext[indexNum + 1] += 1;
+                    // }
                 }
 
                 if (cell.getStringCellValue().equals("") && !f && (groupIndex.get(group) == x)){
@@ -273,9 +284,47 @@ public class ReadExcel {
         return finalizeDayItems(items, used, forNext);
     }
 
-    // private boolean forQuad(){
-
-    // }
+    private boolean forQuad(String src){
+        boolean f = false;
+        src = src.stripLeading();
+        src = src.stripTrailing();        
+        ArrayList<String> ref = new ArrayList<>();
+        ref.add("лабораторные работы");
+        ref.add("ассистент Александрова А.А.");
+        ref.add("старший преподаватель Елистратов С.С.");
+        ref.add("практика");
+        ref.add("недели: 24,28,32,36  1 подгруппа Спортивный зал");
+        ref.add("Панов А.Ю.");
+        ref.add("профессор Логунов В.И.");
+        ref.add("лекции");
+        ref.add("доцент Шумилов Е.А.");
+        ref.add("Кураторский час");
+        ref.add("Гурина Я.В.");
+        ref.add("лекция");
+        ref.add("Любавина О.С.");
+        ref.add("доцент Поднебесова М.И.");
+        ref.add("доцент Осипов А.П.");
+        ref.add("доцент Савельев В.В.");
+        ref.add("доцент  Широков А.В.");
+        ref.add("практика  ");
+        ref.add("доцент Денисова О.Н.");
+        ref.add("доцент    Чичкина В.Д.");
+        ref.add("старший преподаватель Буркина Т.А.");
+        ref.add("доцент Литвинов В.Л.");
+        ref.add("недели: 27,31");
+        ref.add("ассистент Васецкая Е.С.");
+        ref.add("ЭКЗАМЕН");
+        ref.add("ЗАЧЁТ с ОЦЕНКОЙ");
+        ref.add("лекция недели:27,31,35,39");
+        // ref.add("");
+        // ref.add("");
+        for (int i = 0; i < ref.size(); i++){
+            if (src.equals(ref.get(i))){
+                f = true;
+            }
+        }
+        return f;
+    }
 
     // входит ли группа в широкий предмет
     private boolean isWideMerged(int row, int column) {

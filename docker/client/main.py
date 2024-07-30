@@ -27,7 +27,7 @@ if __name__ == '__main__':
     tt = tts[0]
     connection.close()
 
-    application = ApplicationBuilder().token('7422363040:AAHOxVTgX0j1k54YNIv-NYJpPGxmp0qXStM').build()
+    application = ApplicationBuilder().token('token').build()
     
     timer_handler = CommandHandler('timer', callback_timer)
     

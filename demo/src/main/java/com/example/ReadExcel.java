@@ -154,7 +154,7 @@ public class ReadExcel {
         Row row = sheet.getRow(odd);
 
         // столбец с именами групп
-        int count = Time() + 1;
+        int count = timeCell() + 1;
         Cell cell = row.getCell(count);
 
         // максимум столбцов
@@ -335,6 +335,29 @@ public class ReadExcel {
             }
         }
         return finalizeDayItems(items, used, forNext);
+    }
+
+    private ArrayList<String> timeIndexes(int start, int end){
+        Sheet sheet = workbook.getSheetAt(sheetIndex);
+        Row row = sheet.getRow(start);
+        ArrayList<String> items = new ArrayList<String>();
+        int baseX = timeCell();
+        Cell cell = row.getCell(baseX);
+
+        for (int i = start; i < end; i++){
+
+            
+
+            row = sheet.getRow(i);
+            if (row.getCell(baseX) != null){
+                cell = row.getCell(baseX);
+            }
+            else{
+                cell.setCellValue("");
+            }
+        }
+
+        return items;
     }
 
     // для проверки особых двойных пар
@@ -525,7 +548,7 @@ public class ReadExcel {
         Cell cell = row.getCell(0);
 
         // по столбцу времени 
-        int time = Time();
+        int time = timeCell();
         int miss = 0, last = even, count = even + 1;
         cell = row.getCell(time);
 
@@ -547,7 +570,7 @@ public class ReadExcel {
     }
 
     // возврат номера столбца 'Время подачи звонков'
-    private int Time() {
+    private int timeCell() {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         Row row = sheet.getRow(even);
         Cell cell = row.getCell(0);

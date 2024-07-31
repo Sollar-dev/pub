@@ -212,6 +212,14 @@ public class ReadExcel {
         }
         for (int i = 0; i < days.size() - 1; i += 1) {
             ArrayList<String> tmp = dayItems(groupIndex.get(group), endX, days.get(i), days.get(i + 1));
+
+            ArrayList<Integer> timeI = timeIndexes(days.get(i), days.get(i + 1));
+            ArrayList<String> time = timeContent(timeI);
+            ArrayList<String> time2 = new ArrayList<>();
+            for(String j : time){
+                time2.add(trimSpaces(j));
+            }
+
             weakShedule.add(tmp);
         }
 
@@ -337,23 +345,46 @@ public class ReadExcel {
         return finalizeDayItems(items, used, forNext);
     }
 
-    private ArrayList<String> timeIndexes(int start, int end){
+    private ArrayList<String> timeContent(ArrayList<Integer> indexes){
+        Sheet sheet = workbook.getSheetAt(sheetIndex);
+        Row row;
+        ArrayList<String> items = new ArrayList<String>();
+        int baseX = timeCell();
+        Cell cell;
+        for (Integer index : indexes) {
+            row = sheet.getRow(index);
+            cell = row.getCell(baseX);
+            items.add(cell.getStringCellValue());
+        }
+
+
+        // for (int i = start; i < end; i++){
+        //     row = sheet.getRow(i);
+        //     if (row.getCell(baseX) != null){
+        //         cell = row.getCell(baseX);
+        //         if (!cell.getStringCellValue().equals("")){
+        //             items.add(cell.getStringCellValue());
+        //         }
+        //     }
+        // }
+
+        return items;
+    }
+
+    private ArrayList<Integer> timeIndexes(int start, int end){
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         Row row = sheet.getRow(start);
-        ArrayList<String> items = new ArrayList<String>();
+        ArrayList<Integer> items = new ArrayList<Integer>();
         int baseX = timeCell();
         Cell cell = row.getCell(baseX);
 
-        for (int i = start; i < end; i++){
-
-            
-
+        for (int i = start; i < end + 1; i++){
             row = sheet.getRow(i);
             if (row.getCell(baseX) != null){
                 cell = row.getCell(baseX);
-            }
-            else{
-                cell.setCellValue("");
+                if (!cell.getStringCellValue().equals("")){
+                    items.add(i);
+                }
             }
         }
 
@@ -578,6 +609,19 @@ public class ReadExcel {
         while (!cell.getStringCellValue().equals("Время подачи звонков")) {
             time += 1;
             cell = row.getCell(time);
+        }
+        row = sheet.getRow(even + 1);
+        if (row.getCell(time) != null){
+            cell = row.getCell(time);
+            if (cell.getStringCellValue().equals("")){
+                row = sheet.getRow(even);
+                time += 1;
+                cell = row.getCell(time);
+                while (!cell.getStringCellValue().equals("Время подачи звонков")) {
+                    time += 1;
+                    cell = row.getCell(time);
+                }
+            }
         }
         return time;
     }

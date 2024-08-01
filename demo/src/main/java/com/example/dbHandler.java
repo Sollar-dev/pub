@@ -68,7 +68,7 @@ public class dbHandler {
 
     public void addState(states itemStates){
         try (PreparedStatement statement = this.connection.prepareStatement(
-            "INSERT INTO " +tableName + "('course', 'EDUGroup', 'weak', 'day', 'text')" + "VALUES(?, ?, ?, ?, ?)")){
+            "INSERT INTO " + tableName + "('course', 'EDUGroup', 'weak', 'day', 'text')" + "VALUES(?, ?, ?, ?, ?)")){
             statement.setObject(1, itemStates.course);
             statement.setObject(2, itemStates.group);
             statement.setObject(3, itemStates.weak);

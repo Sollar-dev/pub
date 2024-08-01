@@ -213,164 +213,129 @@ public class ReadExcel {
         for (int i = 0; i < days.size() - 1; i += 1) {
             ArrayList<String> tmp = dayItems(groupIndex.get(group), endX, days.get(i), days.get(i + 1));
 
-            ArrayList<Integer> timeI = timeIndexes(days.get(i), days.get(i + 1));
-            ArrayList<String> time = timeContent(timeI);
-            ArrayList<String> time2 = new ArrayList<>();
-            for(String j : time){
-                time2.add(trimSpaces(j));
-            }
-
             weakShedule.add(tmp);
         }
 
         return weakShedule;
     }
 
+    //пометка что пара двойная
+    int[] forNext = new int[] {0, 0, 0, 0, 0, 0};
+
+    //количество предметов в одном номере пары
+    int[] used = new int[] {0, 0, 0, 0, 0, 0};
+
     // расписание на день
     private ArrayList<String> dayItems(int startX, int endX, int startY, int endY) {
-        ArrayList<String> items = new ArrayList<String>();
-        Sheet sheet = workbook.getSheetAt(sheetIndex);
-        Row row = sheet.getRow(startY);
-        Cell cell = row.getCell(startX);
+        ArrayList<String> day = new ArrayList<String>();
 
-        // чередует сроки
-        boolean f = false;
+        ArrayList<Integer> YIndex = timeIndexes(startY, endY);
+        ArrayList<String> timeForItem = timeContent(YIndex);
+        // ArrayList<String> time2 = new ArrayList<>();
+        // for(String j : forTime){
+        //     time2.add(trimSpaces(j));
+        // }
 
-        // для добавления
-        String item = "";
+        // обнуляем
+        for (int i = 0; i < 6; i++){
+            forNext[i] = 0;
+            used[i] = 0;
+        }
 
         // номер пары
-        char num = '1';
-
-        //пометка что пара двойная
-        int[] forNext = new int[] {0, 0, 0, 0, 0, 0};
-
-        //количество предметов в одном номере пары
-        int[] used = new int[] {0, 0, 0, 0, 0, 0};
-
-        for (int y = startY + 1; y < endY; y += 1) {
-            for (int x = startX; x < endX; x += 1) {
-                if (row.getCell(x) != null){
-                    cell = row.getCell(x);
-                }
-                else {
-                    cell.setCellValue("");
-                }
-
-                if (!cell.getStringCellValue().equals("") && !f) {
-                    item = "";
-
-                    // номер пары для массива
-                    int indexNum = num - '1';
-                    // двойная особая пара
-                    if (forQuad(cell.getStringCellValue())){
-
-                        // предыдущий предмет как начало строки
-                        item = items.get(items.size() - 1);
-                        items.remove(items.size() - 1);
-
-                        // двойная
-                        forNext[indexNum] += 1;
-                    }
-                    else{
-                        used[indexNum] += 1;
-                        item += num;
-
-                        //двойная пара обычная (объедененная клетка)
-                        if (downDoubleMerge(y, x)) {
-                            forNext[indexNum + 1] += 1;
-                        }
-                    }
-
-                    item += " ";
-                    item += cell.getStringCellValue();
-
-                    row = sheet.getRow(y);
-                    cell = row.getCell(x);
-                    item += " ";
-                    item += cell.getStringCellValue();
-
-                    items.add(item);
-                }
-
-                // для широкой пары
-                if (cell.getStringCellValue().equals("") && !f && (groupIndex.get(group) == x)){
-                    Cell cellForWide;
-                    int prevGroup = group - 1;
-
-                    // проверка Объединенных ячеек в предыдущий группах
-                    while(prevGroup >= 0){
-                        int cellIndex = groupIndex.get(prevGroup) + (x - groupIndex.get(group));
-                        cellForWide = row.getCell(cellIndex);
-                        if (row.getCell(cellIndex) != null){
-                            cellForWide = row.getCell(cellIndex);
-                        }
-                        else {
-                            cellForWide.setCellValue("");
-                        }
-
-                        // проходят ли их границы через текущую группу
-                        if (!cellForWide.getStringCellValue().equals("")){
-                            if (isWideMerged(row.getRowNum(), cellForWide.getColumnIndex()) == true){
-                                    item = "";
-                                    int indexNum = num - '1';
-                                    used[indexNum] += 1;
-                                    item += num;
-                                    item += " ";
-                                    item += cellForWide.getStringCellValue();
-                                    row = sheet.getRow(y);
-                                    item += " ";
-                                    cellForWide = row.getCell(groupIndex.get(prevGroup) + (x - groupIndex.get(group)));
-                                    item += cellForWide.getStringCellValue();
-            
-                                    items.add(item);
-                                    break;
-                            }
-                        }
-                        prevGroup -= 1;
-                    }
-                }
-                row = sheet.getRow(y - 1);
-            }
-            row = sheet.getRow(y);
-
-            // чередование строк
-            if (f) {
-                num += 1;
-                f = false;
-            } else {
-                f = true;
-            }
+        char itemIndex = '0';
+        for (int Y = 0; Y < YIndex.size() - 1; Y++) {
+            itemIndex += 1;
+            day.addAll(itemInHour(startX, endX, YIndex.get(Y), YIndex.get(Y + 1), itemIndex));
         }
-        return finalizeDayItems(items, used, forNext);
+
+        return finalizeDayItems(day, used, forNext);
     }
 
+    // предметы в часе
+    private ArrayList<String> itemInHour(int startX, int endX, int startY, int endY, char itemIndex){
+        ArrayList<String> items = new ArrayList<String>();
+        Sheet sheet = workbook.getSheetAt(sheetIndex);
+
+        Row row;
+        Cell cell;
+
+        // сверху вниз, слева направо
+        for (int x = startX; x < endX; x += 1) {
+            String item = "";
+            for (int y = startY; y != endY; y++){
+                row = sheet.getRow(y);
+                if (row.getCell(x) != null){
+                    cell = row.getCell(x);
+                    if (!cell.getStringCellValue().equals("")){
+                        item += cell.getStringCellValue() + " ";
+                        if (downDoubleMerge(row.getRowNum(), cell.getColumnIndex(), endY) == true){
+                            forNext[itemIndex - '0'] = 1;
+                        }
+                        if (forQuad(item) == true){
+
+                            // флаг надо связать с предыдущим предметом в finalizeDayItems
+                            forNext[itemIndex  - 1 - '0'] = 5;
+
+                            // флаг не использовать как отдельный предмет
+                            used[itemIndex - 1 - '0'] -= 1;
+                        }
+                    }
+
+                    // проверяем предметы предыдущих групп
+                    else{
+                        if (groupIndex.get(group) == x){
+                            Cell cellForWide;
+                            int prevGroup = group - 1;
+                            while(prevGroup >= 0){
+                                int cellIndex = groupIndex.get(prevGroup) + (x - groupIndex.get(group));
+                                cellForWide = row.getCell(cellIndex);
+                                if (row.getCell(cellIndex) != null){
+                                    cellForWide = row.getCell(cellIndex);
+                                    if (isWideMerged(row.getRowNum(), cellForWide.getColumnIndex()) == true){
+                                        item += cellForWide.getStringCellValue() + " ";
+                                        if (downDoubleMerge(row.getRowNum(), cell.getColumnIndex(), endY) == true){
+                                            forNext[itemIndex - '0'] = 1;
+                                        }
+                                        if (forQuad(item) == true){
+                                            forNext[itemIndex  - 1 - '0'] = 5;
+                                            used[itemIndex - 1 - '0'] -= 1;
+                                        }
+                                    }
+                                }
+                                prevGroup -= 1;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!item.equals("")){
+                used[itemIndex - 1 - '0'] += 1;
+                item = itemIndex + " " + item;
+                items.add(item);
+            }
+        }
+
+        return items;
+    }
+
+    // содержимое времени
     private ArrayList<String> timeContent(ArrayList<Integer> indexes){
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         Row row;
         ArrayList<String> items = new ArrayList<String>();
         int baseX = timeCell();
         Cell cell;
-        for (Integer index : indexes) {
-            row = sheet.getRow(index);
+        for (int i = 0; i < indexes.size() - 1; i++) {
+            row = sheet.getRow(indexes.get(i));
             cell = row.getCell(baseX);
             items.add(cell.getStringCellValue());
         }
 
-
-        // for (int i = start; i < end; i++){
-        //     row = sheet.getRow(i);
-        //     if (row.getCell(baseX) != null){
-        //         cell = row.getCell(baseX);
-        //         if (!cell.getStringCellValue().equals("")){
-        //             items.add(cell.getStringCellValue());
-        //         }
-        //     }
-        // }
-
         return items;
     }
 
+    // индексы ячеек времени
     private ArrayList<Integer> timeIndexes(int start, int end){
         Sheet sheet = workbook.getSheetAt(sheetIndex);
         Row row = sheet.getRow(start);
@@ -409,7 +374,7 @@ public class ReadExcel {
         ref.add("профессор Логунов В.И.");
         ref.add("лекции");
         ref.add("доцент Шумилов Е.А.");
-        ref.add("Кураторский час");
+        //ref.add("Кураторский час");
         ref.add("Гурина Я.В.");
         ref.add("лекция");
         ref.add("Любавина О.С.");
@@ -427,7 +392,7 @@ public class ReadExcel {
         ref.add("ЭКЗАМЕН");
         ref.add("ЗАЧЁТ с ОЦЕНКОЙ");
         ref.add("лекция недели:27,31,35,39");
-        // ref.add("");
+        ref.add("Лабораторные рааботы");
         // ref.add("");
 
         // сравнение
@@ -477,15 +442,23 @@ public class ReadExcel {
 
                 // добавляем пару
                 while (used[i] != 0) {
-                    // удаляем лишние пробелы
                     finalItems.add(trimSpaces(items.get(count)));
                     count++;
                     used[i] -= 1;
                 }
             } else {
-
-                // если двойная особые символ на следующую пару
                 if (forNext[i] != 0){
+
+                    // связываем с предыдущим предметом
+                    if (forNext[i] == 5){
+                        String tmp = finalItems.get(i - 1);
+                        finalItems.remove(i - 1);
+                        tmp = tmp + " " + items.get(count).substring(1);
+                        count++;
+                        finalItems.add(trimSpaces(tmp));
+                    }
+
+                    // если двойная особый символ на следующую пару
                     finalItems.add("&");
                 }
                 else {
@@ -519,7 +492,7 @@ public class ReadExcel {
     }
 
     // двойная пара? вниз
-    private boolean downDoubleMerge(int row, int column) {
+    private boolean downDoubleMerge(int row, int column, int forComp) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
 
         // количество объединенных ячеек
@@ -532,8 +505,8 @@ public class ReadExcel {
 
             if (row >= ca.getFirstRow() && row <= ca.getLastRow() && column >= ca.getFirstColumn() && column <= ca.getLastColumn()) {
 
-                // если нижнее ребро дальше чем верхнее более чем на 1 строку
-                if (ca.getLastRow() > ca.getFirstRow() + 1) {
+                // если нижнее ребро дальше чем верхнее более чем на
+                if (ca.getLastRow() > forComp) {
                     return true;
                 }
             }

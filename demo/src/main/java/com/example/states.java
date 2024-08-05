@@ -8,6 +8,10 @@ public class states {
     public String text;
     public String course;
 
+    // для уровня образования
+    public String courseName;
+    public int courseCode;
+
     public states(int id, String course, String group, boolean weak, short day, String text){
         this.id = id;
         this.course = course;
@@ -16,12 +20,23 @@ public class states {
         this.day = day;
         this.text = text;
     }
+
     public states(String course, String group, boolean weak, short day, String text){
         this.course = course;
         this.group = group;
         this.weak = weak;
         this.day = day;
         this.text = text;
+    }
+
+    public states(boolean weak, short day, String text){
+        this.weak = weak;
+        this.day = day;
+        this.text = text;
+    }
+
+    public states(String courseName){
+        this.courseName = courseName;
     }
 
     @Override

@@ -2,21 +2,22 @@ package com.example;
 
 import org.sqlite.JDBC;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class dbHandler {
-    private static final String CON_STR = "jdbc:sqlite:db/test.db";
+    private static final String CON_STR = "jdbc:sqlite:db/full.db";
 
     private static dbHandler instance = null;
-    private static String tableName = "";
 
-    public static synchronized dbHandler getInstance(String TableName) throws SQLException{
-        tableName = TableName;
+    public static synchronized dbHandler getInstance() throws SQLException{
         if (instance == null){
             instance = new dbHandler();
         }
-        
 
         return instance;
     }
@@ -26,7 +27,9 @@ public class dbHandler {
     private dbHandler() throws SQLException{
         DriverManager.registerDriver(new JDBC());
         this.connection = DriverManager.getConnection(CON_STR);
+    }
 
+    public void createTabforGroup(String tableName){
         try{
             Statement statement = connection.createStatement();
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + tableName + " ("
@@ -43,30 +46,61 @@ public class dbHandler {
         }
     }
 
-    public List<states> getAllProducts(){
-        try (Statement statement = this.connection.createStatement()){
-            List<states> states = new ArrayList<states>();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + "");
-            
-            int a = 0;
-            while (resultSet.next()) {
-                states.add(new states(resultSet.getInt("id"), resultSet.getString("course"), resultSet.getString("EDUGroup"), (resultSet.getBoolean("weak")), 
-                resultSet.getShort("day"), resultSet.getString("text")));
-                if (a == 10){
-                    return states;
-                }
-                a += 1;
-            }
-
-            return states;
+    public void createTabForCourse(String tableName){
+        try{
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + tableName + " ("
+            + " courseName      TEXT NOT NULL,"
+            + " courseCode      INTEGER PRIMARY KEY AUTOINCREMENT"
+            + ")");
         }
-        catch (SQLException e){
+        catch(SQLException e){
             e.printStackTrace();
-            return Collections.emptyList();
         }
     }
 
-    public void addState(states itemStates){
+    public void createGroupTab(String tableName){
+        try{
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS [" + tableName + "] ("
+            + " id         INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + " weak       INTEGER,"
+            + " day        INTEGER NOT NULL,"
+            + " text       TEXT"
+            + ")");
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void addStateInGroup(states itemStates, String tableName){
+        try (PreparedStatement statement = this.connection.prepareStatement(
+            "INSERT INTO [" + tableName + "]('weak', 'day', 'text')" + "VALUES(?, ?, ?)")){
+            statement.setObject(1, itemStates.weak);
+            statement.setObject(2, itemStates.day);
+            statement.setObject(3, itemStates.text);
+
+            statement.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addStateForCourse(states itemStates, String tableName){
+        try (PreparedStatement statement = this.connection.prepareStatement(
+            "INSERT INTO " + tableName + "('courseName')" + "VALUES(?)")){
+            statement.setObject(1, itemStates.courseName);
+
+            statement.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addStateforGroup(states itemStates, String tableName){
         try (PreparedStatement statement = this.connection.prepareStatement(
             "INSERT INTO " + tableName + "('course', 'EDUGroup', 'weak', 'day', 'text')" + "VALUES(?, ?, ?, ?, ?)")){
             statement.setObject(1, itemStates.course);
@@ -92,7 +126,7 @@ public class dbHandler {
         }
     }
 
-    public void deleteState(int id){
+    public void deleteState(int id, String tableName){
         try {
             PreparedStatement statement = this.connection.prepareStatement(
             "DELETE FROM " + tableName + " WHERE id = ?"
@@ -102,6 +136,24 @@ public class dbHandler {
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public boolean checkCourseIfExist(String course, String tableName){
+        try (Statement statement = this.connection.createStatement()){
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE courseName='" + course + "'");
+
+            int code = resultSet.getInt("courseCode");
+            if (code == 0){
+                return false;
+            }
+            else{
+                return true;
+            }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+            return false;
         }
     }
 }

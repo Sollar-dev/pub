@@ -90,7 +90,19 @@ public class ReadExcel {
     private void setSheetNames() {
         sheetsAmount = workbook.getNumberOfSheets();
         for (int i = 0; i < sheetsAmount; i++) {
-            sheetsNames.add(i, workbook.getSheetName(i));
+            if (workbook.getSheetName(i).charAt(0) >= '0' || workbook.getSheetName(i).charAt(0) <= '9'){
+                if (workbook.getSheetName(i).charAt(1) != ' '){
+                    String tmp = workbook.getSheetName(i);
+                    tmp = tmp.charAt(0) + " " + tmp.substring(1);
+                    sheetsNames.add(i, tmp);
+                }
+                else{
+                    sheetsNames.add(i, workbook.getSheetName(i));
+                }
+            }
+            else{
+                sheetsNames.add(i, workbook.getSheetName(i));
+            }
         }
     }
 

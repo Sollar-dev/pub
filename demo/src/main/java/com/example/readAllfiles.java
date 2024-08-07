@@ -1,10 +1,21 @@
 package com.example;
 
 import java.io.File;
+import java.sql.SQLException;
 
 public class readAllfiles {
     public readAllfiles(){
         readDir();
+
+        dbHandler mDbHandler = null;
+
+        try {
+            mDbHandler = dbHandler.getInstance();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        mDbHandler.closeConnection();
     }
 
     private void readDir(){

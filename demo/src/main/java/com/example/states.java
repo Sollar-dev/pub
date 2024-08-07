@@ -35,8 +35,13 @@ public class states {
         this.text = text;
     }
 
-    public states(String courseName){
-        this.courseName = courseName;
+    public states(String name, boolean isCourse){
+        if (isCourse == true){
+            this.courseName = name;
+        }
+        else{
+            this.group = name;
+        }
     }
 
     @Override

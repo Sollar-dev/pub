@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 
 public class dbHandler {
     private static final String CON_STR = "jdbc:sqlite:db/full.db";
-
     private static dbHandler instance = null;
 
     public static synchronized dbHandler getInstance() throws SQLException{
@@ -29,16 +28,12 @@ public class dbHandler {
         this.connection = DriverManager.getConnection(CON_STR);
     }
 
-    public void createTabforGroup(String tableName){
+    public void createCourseTabforGroup(String tableName){
         try{
             Statement statement = connection.createStatement();
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + tableName + " ("
-            + " id         INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + " course     TEXT NOT NULL,"
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS [" + tableName + "] ("
             + " EDUGroup   TEXT NOT NULL,"
-            + " weak       INTEGER,"
-            + " day        INTEGER NOT NULL,"
-            + " text       TEXT"
+            + " id         INTEGER PRIMARY KEY AUTOINCREMENT"
             + ")");
         }
         catch(SQLException e){
@@ -100,14 +95,10 @@ public class dbHandler {
         }
     }
 
-    public void addStateforGroup(states itemStates, String tableName){
+    public void addStateGroupInCourse(states itemStates, String tableName){
         try (PreparedStatement statement = this.connection.prepareStatement(
-            "INSERT INTO " + tableName + "('course', 'EDUGroup', 'weak', 'day', 'text')" + "VALUES(?, ?, ?, ?, ?)")){
-            statement.setObject(1, itemStates.course);
-            statement.setObject(2, itemStates.group);
-            statement.setObject(3, itemStates.weak);
-            statement.setObject(4, itemStates.day);
-            statement.setObject(5, itemStates.text);
+            "INSERT INTO [" + tableName + "]('EDUGroup')" + "VALUES(?)")){
+            statement.setObject(1, itemStates.group);
 
             statement.execute();
 

@@ -29,19 +29,16 @@ public class fillDBWithThis {
         for (String cs : RE.getSheetsNames()){
             RE.setSheetIndex(csNum);
             if (mDbHandler.checkCourseIfExist(cs, nameForTabCourse) == false){
-                mDbHandler.addStateForCourse(new states(cs), nameForTabCourse);
+                mDbHandler.addStateForCourse(new states(cs, true), nameForTabCourse);
+                mDbHandler.createCourseTabforGroup(nameForTabCourse + " " + cs);
             }
             for (String gr : RE.getGroupNames()) {
+                mDbHandler.addStateGroupInCourse(new states(gr, false), nameForTabCourse + " " + cs);
                 RE.setGroup(grNum);
 
                 mDbHandler.createGroupTab(gr);
 
-                // int code = mDbHandler.getCourseCode(cs, nameForTabCourse);
-                // String tabForGroup = nameForTabCourse + "k" + code;
-
-                // mDbHandler.createTabforGroup(tabForGroup);
-                // insertWeeks(cs, gr, tabForGroup);
-                insertWeeks(cs, gr, gr);
+                insertWeeks(gr);
 
                 grNum += 1;
             }
@@ -50,7 +47,7 @@ public class fillDBWithThis {
         }
     }
 
-    private void insertWeeks(String course, String group, String nameForTabGroup){
+    private void insertWeeks(String nameForTabGroup){
         // 0 четная, 1 нечетная
         ArrayList<ArrayList<String>> weekItems = RE.DoubleWeak();
 
@@ -63,7 +60,6 @@ public class fillDBWithThis {
             }
             for (String item : dayItems){
                 mDbHandler.addStateInGroup(new states(weak, day, item), nameForTabGroup);
-                // mDbHandler.addStateforGroup(new states(course, group, weak, day, item), nameForTabGroup);
             }
             day += 1;
         }

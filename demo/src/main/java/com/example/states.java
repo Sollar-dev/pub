@@ -12,6 +12,14 @@ public class states {
     public String courseName;
     public int courseCode;
 
+    public String num;
+    public String secName;
+    public String aud;
+    public String prof;
+    public String type;
+    public String title;
+    public String extra;
+
     public states(int id, String course, String group, boolean weak, short day, String text){
         this.id = id;
         this.course = course;
@@ -19,6 +27,18 @@ public class states {
         this.weak = weak;
         this.day = day;
         this.text = text;
+    }
+
+    public states(boolean weak, short day, String num, String secName, String aud, String prof, String type, String title, String extra){
+        this.weak = weak;
+        this.day = day;
+        this.num = num;
+        this.secName = secName;
+        this.aud = aud;
+        this.prof = prof;
+        this.type = type;
+        this.title = title;
+        this.extra = extra;
     }
 
     public states(String course, String group, boolean weak, short day, String text){

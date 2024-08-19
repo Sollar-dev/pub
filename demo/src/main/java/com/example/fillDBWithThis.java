@@ -7,7 +7,7 @@ public class fillDBWithThis {
     ReadExcel RE;
     dbHandler mDbHandler;
 
-    fillDBWithThis(String fileName, String nameForTabCourse){
+    fillDBWithThis(String fileName, String edu){
         RE = new ReadExcel(fileName);
 
         try {
@@ -16,24 +16,24 @@ public class fillDBWithThis {
             e.printStackTrace();
         }
 
-        parseAll(nameForTabCourse);
+        parseAll(edu);
 
         RE.close();
     }
 
-    private void parseAll(String nameForTabCourse){
+    private void parseAll(String edu){
         short csNum = 0, grNum = 0;
 
-        mDbHandler.createTabForCourse(nameForTabCourse);
+        mDbHandler.createTabForCourse(edu);
 
         for (String cs : RE.getSheetsNames()){
             RE.setSheetIndex(csNum);
-            if (mDbHandler.checkCourseIfExist(cs, nameForTabCourse) == false){
-                mDbHandler.addStateForCourse(new states(cs, true), nameForTabCourse);
-                mDbHandler.createCourseTabforGroup(nameForTabCourse + " " + cs);
+            if (mDbHandler.checkCourseIfExist(cs, edu) == false){
+                mDbHandler.addStateForCourse(new states(cs, true), edu);
+                mDbHandler.createCourseTabforGroup(edu + " " + cs);
             }
             for (String gr : RE.getGroupNames()) {
-                mDbHandler.addStateGroupInCourse(new states(gr, false), nameForTabCourse + " " + cs);
+                mDbHandler.addStateGroupInCourse(new states(gr, false), edu + " " + cs);
                 RE.setGroup(grNum);
 
                 mDbHandler.createGroupTab(gr);
@@ -59,7 +59,14 @@ public class fillDBWithThis {
                 weak = false;
             }
             for (String item : dayItems){
-                mDbHandler.addStateInGroup(new states(weak, day, item), nameForTabGroup);
+                splitItem sItem = new splitItem(item);
+                ArrayList<String> parts = sItem.getSplitItem();
+                if (parts.get(6) != ""){
+                    System.out.println(nameForTabGroup + " " + parts.get(6));
+                }
+                mDbHandler.addStateInGroup(new states(weak, day, 
+                parts.get(0), parts.get(1), parts.get(2), parts.get(3), parts.get(4), parts.get(5), parts.get(6))
+                , nameForTabGroup);
             }
             day += 1;
         }

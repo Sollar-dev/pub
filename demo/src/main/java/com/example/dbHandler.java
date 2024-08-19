@@ -9,6 +9,8 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import java.util.ArrayList;
+
 public class dbHandler {
     private static final String CON_STR = "jdbc:sqlite:db/full.db";
     private static dbHandler instance = null;
@@ -58,10 +60,16 @@ public class dbHandler {
         try{
             Statement statement = connection.createStatement();
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS [" + tableName + "] ("
-            + " id         INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + " weak       INTEGER,"
-            + " day        INTEGER NOT NULL,"
-            + " text       TEXT"
+            + " id          INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + " weak        INTEGER,"
+            + " day         INTEGER NOT NULL,"
+            + " num         TEXT,"
+            + " title       TEXT,"
+            + " type        TEXT,"
+            + " aud         TEXT,"
+            + " prof        TEXT,"
+            + " secName     TEXT,"
+            + " extra       TEXT"
             + ")");
         }
         catch(SQLException e){
@@ -71,10 +79,16 @@ public class dbHandler {
 
     public void addStateInGroup(states itemStates, String tableName){
         try (PreparedStatement statement = this.connection.prepareStatement(
-            "INSERT INTO [" + tableName + "]('weak', 'day', 'text')" + "VALUES(?, ?, ?)")){
+            "INSERT INTO [" + tableName + "]('weak', 'day', 'num', 'title', 'type', 'aud', 'prof', 'secName', 'extra')" + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)")){
             statement.setObject(1, itemStates.weak);
             statement.setObject(2, itemStates.day);
-            statement.setObject(3, itemStates.text);
+            statement.setObject(3, itemStates.num);
+            statement.setObject(4, itemStates.title);
+            statement.setObject(5, itemStates.type);
+            statement.setObject(6, itemStates.aud);
+            statement.setObject(7, itemStates.prof);
+            statement.setObject(8, itemStates.secName);
+            statement.setObject(9, itemStates.extra);
 
             statement.execute();
 

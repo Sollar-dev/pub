@@ -28,6 +28,7 @@ public class dbHandler {
         this.connection = DriverManager.getConnection(CON_STR);
     }
 
+    // образование + курс, добавляем группы
     public void createCourseTabforGroup(String tableName){
         try{
             Statement statement = connection.createStatement();
@@ -41,6 +42,7 @@ public class dbHandler {
         }
     }
 
+    // образование, добавляем курсы
     public void createTabForCourse(String tableName){
         try{
             Statement statement = connection.createStatement();
@@ -54,6 +56,7 @@ public class dbHandler {
         }
     }
 
+    // группы, добавляем расписание
     public void createGroupTab(String tableName){
         try{
             Statement statement = connection.createStatement();
@@ -75,6 +78,7 @@ public class dbHandler {
         }
     }
 
+    // предмет в группу
     public void addStateInGroup(states itemStates, String tableName){
         try (PreparedStatement statement = this.connection.prepareStatement(
             "INSERT INTO [" + tableName + "]('weak', 'day', 'num', 'title', 'type', 'aud', 'prof', 'secName', 'extra')" + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)")){
@@ -95,6 +99,7 @@ public class dbHandler {
         }
     }
 
+    // курс в образование
     public void addStateForCourse(states itemStates, String tableName){
         try (PreparedStatement statement = this.connection.prepareStatement(
             "INSERT INTO " + tableName + "('courseName')" + "VALUES(?)")){
@@ -107,6 +112,7 @@ public class dbHandler {
         }
     }
 
+    // группу в курс
     public void addStateGroupInCourse(states itemStates, String tableName){
         try (PreparedStatement statement = this.connection.prepareStatement(
             "INSERT INTO [" + tableName + "]('EDUGroup')" + "VALUES(?)")){
@@ -132,7 +138,7 @@ public class dbHandler {
     public void deleteState(int id, String tableName){
         try {
             PreparedStatement statement = this.connection.prepareStatement(
-            "DELETE FROM " + tableName + " WHERE id = ?"
+            "DELETE FROM [" + tableName + "] WHERE id = ?"
             );
             statement.setObject(1, id);
 
@@ -142,6 +148,7 @@ public class dbHandler {
         }
     }
 
+    // существует ли курс
     public boolean checkCourseIfExist(String course, String tableName){
         try (Statement statement = this.connection.createStatement()){
             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE courseName='" + course + "'");

@@ -3,8 +3,6 @@ package com.example;
 public class states {
     public int id;
     public String group;
-    public boolean weak;
-    public short day;
     public String text;
     public String course;
 
@@ -12,6 +10,9 @@ public class states {
     public String courseName;
     public int courseCode;
 
+    // для расписание в группу
+    public boolean weak;
+    public short day;
     public String num;
     public String secName;
     public String aud;

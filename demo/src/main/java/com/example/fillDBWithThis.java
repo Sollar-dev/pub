@@ -21,6 +21,7 @@ public class fillDBWithThis {
         RE.close();
     }
 
+    // проход всего файла
     private void parseAll(String edu){
         short csNum = 0, grNum = 0;
 
@@ -29,13 +30,20 @@ public class fillDBWithThis {
         for (String cs : RE.getSheetsNames()){
             RE.setSheetIndex(csNum);
             if (mDbHandler.checkCourseIfExist(cs, edu) == false){
+
+                // таблица образования с курсами
                 mDbHandler.addStateForCourse(new states(cs, true), edu);
+
+                // таблица курсов (для каждого образования разные) с группами
                 mDbHandler.createCourseTabforGroup(edu + " " + cs);
             }
             for (String gr : RE.getGroupNames()) {
+
+                // в курс добавляем группу
                 mDbHandler.addStateGroupInCourse(new states(gr, false), edu + " " + cs);
                 RE.setGroup(grNum);
 
+                // таблица группы
                 mDbHandler.createGroupTab(gr);
 
                 insertWeeks(gr);
@@ -47,6 +55,7 @@ public class fillDBWithThis {
         }
     }
 
+    // вставляем в таблицу групп недели расписания
     private void insertWeeks(String nameForTabGroup){
         // 0 четная, 1 нечетная
         ArrayList<ArrayList<String>> weekItems = RE.DoubleWeak();
@@ -61,9 +70,8 @@ public class fillDBWithThis {
             for (String item : dayItems){
                 splitItem sItem = new splitItem(item);
                 ArrayList<String> parts = sItem.getSplitItem();
-                // if (parts.get(2) != ""){
-                    // System.out.println(nameForTabGroup + " " + parts);
-                // }
+                
+                // неделя, день, номер пары, фамилия, аудитория, академическое звание, тип, название, дополнительная информация
                 mDbHandler.addStateInGroup(new states(weak, day, 
                 parts.get(0), parts.get(1), parts.get(2), parts.get(3), parts.get(4), parts.get(5), parts.get(6))
                 , nameForTabGroup);

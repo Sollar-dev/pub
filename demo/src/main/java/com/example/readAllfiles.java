@@ -18,6 +18,7 @@ public class readAllfiles {
         mDbHandler.closeConnection();
     }
 
+    // в папках по образованию
     private void readDir(){
         File dir = new File("xlsx/");
         for (String item : dir.list()){
@@ -31,6 +32,7 @@ public class readAllfiles {
             String fileRelativePath = "xlsx/";
             fileRelativePath += dir.getName() + "/" + item.getName();
 
+            // путь к файлу, образование (для таблиц)
             new fillDBWithThis(fileRelativePath, dir.getName());
         }
     }

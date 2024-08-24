@@ -6,14 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class splitItem {
-    private int secNameStart = 0;
-    private int secNameEnd = 0;
-    private int audStart = 0;
-    private int audEnd = 0;
-    private int profStart = 0;
-    private int profEnd = 0;
-    private int typeStart = 0;
-    private int typeEnd = 0;
 
     private int []arr = new int[8];
 
@@ -21,7 +13,6 @@ public class splitItem {
 
     splitItem(String Item){
         item = Item;
-        // item = "1 Кураторский час Начальник отдела ОП и УЧР Гурина Я.В. ауд.3.5";
     }
 
     public ArrayList<String> getSplitItem(){
@@ -39,6 +30,7 @@ public class splitItem {
         return result;
     }
 
+    // подгруппы и недели на будущее
     private String extra(){
         Pattern pattern = Pattern.compile("(((\\d[-]?\\s*подгруп*[аАыЫ]?)|([нН]едел[иИяЯьЬ]))[:-]?\\s?)+((\\d+[,])+\\d*)?");
         Matcher matcher = pattern.matcher(item);
@@ -62,29 +54,27 @@ public class splitItem {
         return tmp;
     }
 
+    // номер пары
     private String getNum(){
         String tmp = item.substring(0, 1);
         item = item.substring(1);
         return tmp;
     }
 
+    // фамилия инициалы
     private String getSecName(){
         Pattern pattern = Pattern.compile("((?<=\\S\\s)[А-Я]{1,3}[а-яё]+)(\\s+.\\s?([, .]|\\s)((\\s\\S.\\s)|((?<=[,.])(\\S|\\s)\\s?[,.]?(\\S\\s)?)))");
         Matcher matcher = pattern.matcher(item);
 
         String tmp = "";
         while (matcher.find()){
-            if (matcher.group().equals("России ")){
-                matcher.group();
-                continue;
-            }
-            secNameStart = matcher.start();
-            arr[0] = secNameStart;
-            secNameEnd = matcher.end();
-            arr[1] = secNameEnd;
-            item = item.substring(0, secNameStart) + item.substring(secNameEnd);
+            arr[0] = matcher.start();
+            arr[1] = matcher.end();
+            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
             tmp += matcher.group();
         }
+
+        // если нет то последнее слово с большой буквы
         if (tmp.equals("")){
             pattern = Pattern.compile("(?<=\\s)[А-Я][а-яё]+");
             matcher = pattern.matcher(item);
@@ -92,83 +82,51 @@ public class splitItem {
                 if (matcher.group().equals("Военная")){
                     continue;
                 }
-                secNameStart = matcher.start();
-                arr[0] = secNameStart;
-                secNameEnd = matcher.end();
-                arr[1] = secNameEnd;
+                arr[0] = matcher.start();
+                arr[1] = matcher.end();
                 tmp = matcher.group();
             }
-            item = item.substring(0, secNameStart) + item.substring(secNameEnd);
+            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
         }
         return tmp;
     }
 
+
+    // аудитория
     private String getAUD(){
         Pattern pattern = Pattern.compile("(([аА]уд\\s*[,.]?\\s*\\S*)((?<=[аА]ктовый)(\\s*\\S*))?)|((\\S*\\s+|(\\S*(?=\\s?)))[зЗ]ал)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(item);
 
         if (matcher.find()){
-            audStart = matcher.start();
-            arr[2] = audStart;
-            audEnd = matcher.end();
-            arr[3] = audEnd;
-            item = item.substring(0, audStart) + item.substring(audEnd);
+            arr[2] = matcher.start();
+            arr[3] = matcher.end();
+            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
             return matcher.group();
         }
         else{
+
+            // последние цифры
             String tmp = "";
             pattern = Pattern.compile("(\\S[-])?\\d+\\S+");
             matcher = pattern.matcher(item);
             while (matcher.find()){
-                audStart = matcher.start();
-                arr[2] = audStart;
-                audEnd = matcher.end();
-                arr[3] = audEnd;
+                arr[2] = matcher.start();
+                arr[3] = matcher.end();
                 tmp = matcher.group();
             }
-            item = item.substring(0, audStart) + item.substring(audEnd);
+            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
             return tmp;
         }
     }
 
+    // академические звания
     private String getProf(){
-        Pattern pattern = Pattern.compile("(профессор)|(доцент)|(старший\\s*преподаватель)|(ассистент)", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("(профессор)|(доцент)|(старший\\s*преподаватель)|(ассистент)|([нН]ачальник\\s+[оО]тдела\\s+([оО][пП])\\s+[иИ]\\s+([уУ][чЧ][рР]))", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(item);
         if (matcher.find()){
-            profStart = matcher.start();
-            arr[4] = profStart;
-            profEnd = matcher.end();
-            arr[5] = profEnd;
-            item = item.substring(0, profStart) + item.substring(profEnd);
-            return matcher.group();
-        }
-        else{
-            pattern = Pattern.compile("[нН]ачальник\\s+[оО]тдела\\s+([оО][пП])\\s+[иИ]\\s+([уУ][чЧ][рР])");
-            matcher = pattern.matcher(item);
-            if (matcher.find()){
-                profStart = matcher.start();
-                arr[4] = profStart;
-                profEnd = matcher.end();
-                arr[5] = profEnd;
-                item = item.substring(0, profStart) + item.substring(profEnd);
-                return matcher.group();
-            }
-            else{
-                return "";
-            }
-        }
-    }
-
-    private String getType(){
-        String regex = "((\\s+([лЛ]\\S{1,4}[цЦ][иИ]*\\S{1,2}[яЯиИ])|([пП]\\S{1,4}[кК]\\S{1,2}[иИ]\\S{1,2}[аА]))+)(?:\\S*\\s*((([пП]\\S{1,4}[кК]\\S{1,2}[иИ]\\S{1,2}[аА])|([лЛ]\\S{1,4}[цЦ][иИ]*\\S{1,2}[яЯ]))+))?|(([лЛ]\\S+[рР]\\S+[рР]\\S+[аАыЫ][еЕяЯ]\\s*[рР]\\S+[бБ]\\S+[аАыЫ]))";
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(item);
-        if (matcher.find()){
-            typeStart = matcher.start();
-            arr[6] = typeStart;
-            typeEnd = matcher.end();
-            arr[7] = typeEnd;
-            item = item.substring(0, typeStart) + item.substring(typeEnd);
+            arr[4] = matcher.start();
+            arr[5] = matcher.end();
+            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
             return matcher.group();
         }
         else{
@@ -176,6 +134,23 @@ public class splitItem {
         }
     }
 
+    // тип пары
+    private String getType(){
+        String regex = "((\\s+([лЛ]\\S{1,4}[цЦ][иИ]*\\S{1,2}[яЯиИ])|([пП]\\S{1,4}[кК]\\S{1,2}[иИ]\\S{1,2}[аА]))+)(?:\\S*\\s*((([пП]\\S{1,4}[кК]\\S{1,2}[иИ]\\S{1,2}[аА])|([лЛ]\\S{1,4}[цЦ][иИ]*\\S{1,2}[яЯ]))+))?|(([лЛ]\\S+[рР]\\S+[рР]\\S+[аАыЫ][еЕяЯ]\\s*[рР]\\S+[бБ]\\S+[аАыЫ]))";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(item);
+        if (matcher.find()){
+            arr[6] = matcher.start();
+            arr[7] = matcher.end();
+            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
+            return matcher.group();
+        }
+        else{
+            return "";
+        }
+    }
+
+    // название предмета (с начала до первой регулярки)
     private String getTitle(){
         int min = getMin();
         String tmp = item.substring(0, min);
@@ -183,6 +158,7 @@ public class splitItem {
         return tmp;
     }
 
+    // первая регулярка для названия
     private int getMin(){
         int min = 1000;
         for (int i : arr) {

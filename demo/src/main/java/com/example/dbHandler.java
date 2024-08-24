@@ -9,8 +9,6 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import java.util.ArrayList;
-
 public class dbHandler {
     private static final String CON_STR = "jdbc:sqlite:db/full.db";
     private static dbHandler instance = null;

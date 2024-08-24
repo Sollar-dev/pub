@@ -61,9 +61,9 @@ public class fillDBWithThis {
             for (String item : dayItems){
                 splitItem sItem = new splitItem(item);
                 ArrayList<String> parts = sItem.getSplitItem();
-                if (parts.get(6) != ""){
-                    System.out.println(nameForTabGroup + " " + parts.get(6));
-                }
+                // if (parts.get(2) != ""){
+                    // System.out.println(nameForTabGroup + " " + parts);
+                // }
                 mDbHandler.addStateInGroup(new states(weak, day, 
                 parts.get(0), parts.get(1), parts.get(2), parts.get(3), parts.get(4), parts.get(5), parts.get(6))
                 , nameForTabGroup);

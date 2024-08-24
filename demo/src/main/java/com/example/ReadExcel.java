@@ -466,8 +466,8 @@ public class ReadExcel {
 
                     // связываем с предыдущим предметом
                     if (forNext[i] == 5){
-                        String tmp = finalItems.get(i - 1);
-                        finalItems.remove(i - 1);
+                        String tmp = finalItems.get(finalItems.size() - 1);
+                        finalItems.remove(finalItems.size() - 1);
                         tmp = tmp + " " + items.get(count).substring(1);
                         count++;
                         finalItems.add(trimSpaces(tmp));

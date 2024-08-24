@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,19 +20,46 @@ public class splitItem {
     private String item;
 
     splitItem(String Item){
-        item = Item.toLowerCase();
+        item = Item;
+        // item = "1 Кураторский час Начальник отдела ОП и УЧР Гурина Я.В. ауд.3.5";
     }
 
     public ArrayList<String> getSplitItem(){
         ArrayList<String> result = new ArrayList<String>();
-        result.add(getNum());
-        result.add(getSecName());
-        result.add(getAUD());
-        result.add(getProf());
-        result.add(getType());
-        result.add(getTitle());
-        result.add(item);
+        while(result.size() < 7) result.add("");
+
+        // result.set(6, extra());
+        result.set(0, getNum());
+        result.set(2, getAUD());
+        result.set(1, getSecName());
+        result.set(3, getProf());
+        result.set(4, getType());
+        result.set(5, getTitle());
+        result.set(6, result.get(6) + " " + item);
         return result;
+    }
+
+    private String extra(){
+        Pattern pattern = Pattern.compile("(((\\d[-]?\\s*подгруп*[аАыЫ]?)|([нН]едел[иИяЯьЬ]))[:-]?\\s?)+((\\d+[,])+\\d*)?");
+        Matcher matcher = pattern.matcher(item);
+
+        String tmp = "";
+        ArrayDeque<Integer> st = new ArrayDeque<Integer>();
+        ArrayDeque<Integer> end = new ArrayDeque<Integer>();
+
+        while (matcher.find()){
+            if (!tmp.equals("")){
+                tmp += " $ ";
+            }
+            tmp += matcher.group();
+            st.push(matcher.start());
+            end.push(matcher.end());
+        }
+        while(st.size() != 0) {
+            item = item.substring(0, st.poll()) + item.substring(end.poll());
+        }
+
+        return tmp;
     }
 
     private String getNum(){
@@ -41,24 +69,44 @@ public class splitItem {
     }
 
     private String getSecName(){
-        Pattern pattern = Pattern.compile("\\S*\\s*\\D[.]\\D[.]");
+        Pattern pattern = Pattern.compile("((?<=\\S\\s)[А-Я]{1,3}[а-яё]+)(\\s+.\\s?([, .]|\\s)((\\s\\S.\\s)|((?<=[,.])(\\S|\\s)\\s?[,.]?(\\S\\s)?)))");
         Matcher matcher = pattern.matcher(item);
-        if (matcher.find()){
+
+        String tmp = "";
+        while (matcher.find()){
+            if (matcher.group().equals("России ")){
+                matcher.group();
+                continue;
+            }
             secNameStart = matcher.start();
             arr[0] = secNameStart;
             secNameEnd = matcher.end();
             arr[1] = secNameEnd;
             item = item.substring(0, secNameStart) + item.substring(secNameEnd);
-            return matcher.group();
+            tmp += matcher.group();
         }
-        else{
-            return "";
+        if (tmp.equals("")){
+            pattern = Pattern.compile("(?<=\\s)[А-Я][а-яё]+");
+            matcher = pattern.matcher(item);
+            while (matcher.find()){
+                if (matcher.group().equals("Военная")){
+                    continue;
+                }
+                secNameStart = matcher.start();
+                arr[0] = secNameStart;
+                secNameEnd = matcher.end();
+                arr[1] = secNameEnd;
+                tmp = matcher.group();
+            }
+            item = item.substring(0, secNameStart) + item.substring(secNameEnd);
         }
+        return tmp;
     }
 
     private String getAUD(){
-        Pattern pattern = Pattern.compile("([аА][уУ][дД]\\D?\\s*\\S*)|(([сСчЧ]\\S*[оОиИ]\\S*[тТ]\\S*[ыЫ]?[йЙ]?\\s*)([зЗ][аА][лЛ]))", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("(([аА]уд\\s*[,.]?\\s*\\S*)((?<=[аА]ктовый)(\\s*\\S*))?)|((\\S*\\s+|(\\S*(?=\\s?)))[зЗ]ал)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(item);
+
         if (matcher.find()){
             audStart = matcher.start();
             arr[2] = audStart;
@@ -68,7 +116,18 @@ public class splitItem {
             return matcher.group();
         }
         else{
-            return "";
+            String tmp = "";
+            pattern = Pattern.compile("(\\S[-])?\\d+\\S+");
+            matcher = pattern.matcher(item);
+            while (matcher.find()){
+                audStart = matcher.start();
+                arr[2] = audStart;
+                audEnd = matcher.end();
+                arr[3] = audEnd;
+                tmp = matcher.group();
+            }
+            item = item.substring(0, audStart) + item.substring(audEnd);
+            return tmp;
         }
     }
 
@@ -84,7 +143,19 @@ public class splitItem {
             return matcher.group();
         }
         else{
-            return "";
+            pattern = Pattern.compile("[нН]ачальник\\s+[оО]тдела\\s+([оО][пП])\\s+[иИ]\\s+([уУ][чЧ][рР])");
+            matcher = pattern.matcher(item);
+            if (matcher.find()){
+                profStart = matcher.start();
+                arr[4] = profStart;
+                profEnd = matcher.end();
+                arr[5] = profEnd;
+                item = item.substring(0, profStart) + item.substring(profEnd);
+                return matcher.group();
+            }
+            else{
+                return "";
+            }
         }
     }
 

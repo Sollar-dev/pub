@@ -70,7 +70,8 @@ public class dbHandler {
             + " aud         TEXT,"
             + " prof        TEXT,"
             + " secName     TEXT,"
-            + " extra       TEXT"
+            + " extra       TEXT,"
+            + " subGroup    TEXT"
             + ")");
         }
         catch(SQLException e){
@@ -81,7 +82,7 @@ public class dbHandler {
     // предмет в группу
     public void addStateInGroup(states itemStates, String tableName){
         try (PreparedStatement statement = this.connection.prepareStatement(
-            "INSERT INTO [" + tableName + "]('weak', 'day', 'num', 'title', 'type', 'aud', 'prof', 'secName', 'extra')" + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)")){
+            "INSERT INTO [" + tableName + "]('weak', 'day', 'num', 'title', 'type', 'aud', 'prof', 'secName', 'extra', 'subGroup')" + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")){
             statement.setObject(1, itemStates.weak);
             statement.setObject(2, itemStates.day);
             statement.setObject(3, itemStates.num);
@@ -91,6 +92,7 @@ public class dbHandler {
             statement.setObject(7, itemStates.prof);
             statement.setObject(8, itemStates.secName);
             statement.setObject(9, itemStates.extra);
+            statement.setObject(10, itemStates.subGroup);
 
             statement.execute();
 

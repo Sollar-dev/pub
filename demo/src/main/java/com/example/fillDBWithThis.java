@@ -40,13 +40,13 @@ public class fillDBWithThis {
             for (String gr : RE.getGroupNames()) {
 
                 // в курс добавляем группу
-                mDbHandler.addStateGroupInCourse(new states(gr, false), edu + " " + cs);
+                mDbHandler.addStateGroupInCourse(new states(gr.strip(), false), edu + " " + cs);
                 RE.setGroup(grNum);
 
                 // таблица группы
-                mDbHandler.createGroupTab(gr);
+                mDbHandler.createGroupTab(gr.strip());
 
-                insertWeeks(gr);
+                insertWeeks(gr.strip());
 
                 grNum += 1;
             }
@@ -70,10 +70,10 @@ public class fillDBWithThis {
             for (String item : dayItems){
                 splitItem sItem = new splitItem(item);
                 ArrayList<String> parts = sItem.getSplitItem();
-                
-                // неделя, день, номер пары, фамилия, аудитория, академическое звание, тип, название, дополнительная информация
+
+                // неделя, день, номер пары, фамилия, аудитория, академическое звание, тип, название, дополнительная информация, подгруппа
                 mDbHandler.addStateInGroup(new states(weak, day, 
-                parts.get(0), parts.get(1), parts.get(2), parts.get(3), parts.get(4), parts.get(5), parts.get(6))
+                parts.get(0), parts.get(1), parts.get(2), parts.get(3), parts.get(4), parts.get(5), parts.get(6), parts.get(7))
                 , nameForTabGroup);
             }
             day += 1;

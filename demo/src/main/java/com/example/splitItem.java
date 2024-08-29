@@ -17,7 +17,7 @@ public class splitItem {
 
     public ArrayList<String> getSplitItem(){
         ArrayList<String> result = new ArrayList<String>();
-        while(result.size() < 7) result.add("");
+        while(result.size() < 8) result.add("");
 
         // result.set(6, extra());
         result.set(0, getNum());
@@ -27,7 +27,29 @@ public class splitItem {
         result.set(4, getType());
         result.set(5, getTitle());
         result.set(6, result.get(6) + " " + item);
+        result.set(7, getSubGroup());
         return result;
+    }
+
+    // 1, 2 или 0 если обе или не указано
+    private String getSubGroup(){
+        // item = "Системное программирование. Лабораторная работа, Камышанец А.К., ауд. 306 1 подгруппа: 1, 5, 9 и 13 неделя; 2 подгруппа: 3, 7, 11, и 15 неделя";
+        Pattern pattern = Pattern.compile("\\s*\\d\\s?([пП]одгруп+[аАыЫ])");
+        Matcher matcher = pattern.matcher(item);
+
+        String subGroup = "0";
+        while (matcher.find()){
+            String tmp = matcher.group();
+            tmp = tmp.stripLeading();
+            if (subGroup.equals("0")){
+                subGroup = tmp.substring(0, 1);
+            }
+            else{
+                subGroup = "0";
+            }
+        }
+        
+        return subGroup;
     }
 
     // подгруппы и недели на будущее
@@ -58,12 +80,13 @@ public class splitItem {
     private String getNum(){
         String tmp = item.substring(0, 1);
         item = item.substring(1);
+        item = item.stripTrailing();
         return tmp;
     }
 
     // фамилия инициалы
     private String getSecName(){
-        Pattern pattern = Pattern.compile("((?<=\\S\\s)[А-Я]{1,3}[а-яё]+)(\\s+.\\s?([, .]|\\s)((\\s\\S.\\s)|((?<=[,.])(\\S|\\s)\\s?[,.]?(\\S\\s)?)))");
+        Pattern pattern = Pattern.compile("([А-Я]\\S+\\s*[-]\\s*)?((?<=\\S\\s)[А-Я]{1,3}[а-яё]+)(\\s+.\\s?([, .]|\\s)((\\s\\S.\\s)|((?<=[,.])(\\S|\\s)\\s?[,.]?(\\S\\s)?)))");
         Matcher matcher = pattern.matcher(item);
 
         String tmp = "";
@@ -86,7 +109,8 @@ public class splitItem {
                 arr[1] = matcher.end();
                 tmp = matcher.group();
             }
-            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
+            if (tmp != "")
+                item = item.substring(0, arr[0]) + item.substring(arr[1]);
         }
         return tmp;
     }
@@ -114,7 +138,8 @@ public class splitItem {
                 arr[3] = matcher.end();
                 tmp = matcher.group();
             }
-            item = item.substring(0, matcher.start()) + item.substring(matcher.end());
+            if (tmp != "")
+                item = item.substring(0, arr[2]) + item.substring(arr[3]);
             return tmp;
         }
     }

@@ -19,7 +19,6 @@ public class splitItem {
         ArrayList<String> result = new ArrayList<String>();
         while(result.size() < 8) result.add("");
 
-        // result.set(6, extra());
         result.set(0, getNum());
         result.set(2, getAUD());
         result.set(1, getSecName());
@@ -33,7 +32,6 @@ public class splitItem {
 
     // 1, 2 или 0 если обе или не указано
     private String getSubGroup(){
-        // item = "Системное программирование. Лабораторная работа, Камышанец А.К., ауд. 306 1 подгруппа: 1, 5, 9 и 13 неделя; 2 подгруппа: 3, 7, 11, и 15 неделя";
         Pattern pattern = Pattern.compile("\\s*\\d\\s?([пП]одгруп+[аАыЫ])");
         Matcher matcher = pattern.matcher(item);
 
@@ -115,10 +113,9 @@ public class splitItem {
         return tmp;
     }
 
-
     // аудитория
     private String getAUD(){
-        Pattern pattern = Pattern.compile("(([аА]уд\\s*[,.]?\\s*\\S*)((?<=[аА]ктовый)(\\s*\\S*))?)|((\\S*\\s+|(\\S*(?=\\s?)))[зЗ]ал)", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("(([аА]уд\\s*[,.]?\\s*((\\S\\s*[-]\\s*\\S+)|\\S*)(\\s*\\D(\\s|$))?)((?<=[аА]ктовый)(\\s*\\S*))?)|((\\S*\\s+|(\\S*(?=\\s?)))[зЗ]ал)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(item);
 
         if (matcher.find()){
@@ -131,7 +128,7 @@ public class splitItem {
 
             // последние цифры
             String tmp = "";
-            pattern = Pattern.compile("(\\S[-])?\\d+\\S+");
+            pattern = Pattern.compile("(\\S[-])?\\d+\\S+(\\s+\\D(\\s|$))?");
             matcher = pattern.matcher(item);
             while (matcher.find()){
                 arr[2] = matcher.start();

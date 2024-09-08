@@ -20,7 +20,7 @@ public class states {
     public String type;
     public String title;
     public String extra;
-    public String subGroup;
+    public int subGroup;
 
     public states(int id, String course, String group, boolean weak, short day, String text){
         this.id = id;
@@ -31,7 +31,7 @@ public class states {
         this.text = text;
     }
 
-    public states(boolean weak, short day, String num, String secName, String aud, String prof, String type, String title, String extra, String subGroup){
+    public states(boolean weak, short day, String num, String secName, String aud, String prof, String type, String title, String extra, int subGroup){
         this.weak = weak;
         this.day = day;
         this.num = num;

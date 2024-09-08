@@ -28,6 +28,19 @@ public class dbHandler {
         this.connection = DriverManager.getConnection(CON_STR);
     }
 
+    public void createTabHaveSubgroups(){
+        try{
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS haveSubGroups ("
+            + " EDUGroup   TEXT NOT NULL,"
+            + " id         INTEGER PRIMARY KEY AUTOINCREMENT"
+            + ")");
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+    }
+
     // образование + курс, добавляем группы
     public void createCourseTabforGroup(String tableName){
         try{
@@ -71,10 +84,25 @@ public class dbHandler {
             + " prof        TEXT,"
             + " secName     TEXT,"
             + " extra       TEXT,"
-            + " subGroup    TEXT"
+            + " subGroup    INTEGER"
             + ")");
         }
         catch(SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void addStateSubGroups(states itemStates){
+        if (checkGroupInTabForSubGroup(itemStates.group) == true){
+            return;
+        }
+        try (PreparedStatement statement = this.connection.prepareStatement(
+            "INSERT INTO haveSubGroups ('EDUGroup')" + "VALUES(?)")){
+            statement.setObject(1, itemStates.group);
+
+            statement.execute();
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -166,6 +194,36 @@ public class dbHandler {
         catch (SQLException e){
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private boolean checkGroupInTabForSubGroup(String group){
+        try (Statement statement = this.connection.createStatement()){
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM haveSubGroups WHERE EDUGroup='" + group + "'");
+
+            int code = resultSet.getInt("id");
+            if (code == 0){
+                return false;
+            }
+            else{
+                return true;
+            }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void delUnnecessaryTab(){
+        try {
+            PreparedStatement statement = this.connection.prepareStatement(
+            "DROP TABLE IF EXISTS [bac 3 -4 курс]"
+            );
+
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

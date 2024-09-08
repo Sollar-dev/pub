@@ -16,6 +16,8 @@ public class fillDBWithThis {
             e.printStackTrace();
         }
 
+        mDbHandler.createTabHaveSubgroups();
+
         parseAll(edu);
 
         RE.close();
@@ -71,9 +73,15 @@ public class fillDBWithThis {
                 splitItem sItem = new splitItem(item);
                 ArrayList<String> parts = sItem.getSplitItem();
 
+                if (!parts.get(7).equals("0")){
+                    mDbHandler.addStateSubGroups(new states(nameForTabGroup, false));
+                }
+
+                int subGroup = Integer.parseInt(parts.get(7).trim());
+
                 // неделя, день, номер пары, фамилия, аудитория, академическое звание, тип, название, дополнительная информация, подгруппа
                 mDbHandler.addStateInGroup(new states(weak, day, 
-                parts.get(0), parts.get(1), parts.get(2), parts.get(3), parts.get(4), parts.get(5), parts.get(6), parts.get(7))
+                parts.get(0), parts.get(1), parts.get(2), parts.get(3), parts.get(4), parts.get(5), parts.get(6), subGroup)
                 , nameForTabGroup);
             }
             day += 1;

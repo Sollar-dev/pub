@@ -15,6 +15,8 @@ public class readAllfiles {
             e.printStackTrace();
         }
 
+        new fixTab3_4Kurs();
+
         mDbHandler.closeConnection();
     }
 

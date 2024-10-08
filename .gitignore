@@ -1,3 +1,9 @@
-db/
-xlsx/
+xlsx/bac/*
+xlsx/mag/*
+xlsx/spo/*
+
 doubleItem.txt
+/docker/
+/sqlite/
+/.vscode/
+/dbFile/*
